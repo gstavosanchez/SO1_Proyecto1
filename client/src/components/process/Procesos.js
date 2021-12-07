@@ -2,26 +2,38 @@ import React from 'react';
 
 export const Procesos = () => {
   return (
-    <div className="card-container mt-10 animate__animated animate__fadeIn">
-      <div className="card">
-        <p className="card__numero">15</p>
-        <h1>Proceso en ejecución</h1>
-      </div>
-      <div className="card">
-        <p className="card__numero">15</p>
-        <h1>Proceso suspendidos</h1>
-      </div>
-      <div className="card">
-        <p className="card__numero">15</p>
-        <h1>Procesos detenidos</h1>
-      </div>
-      <div className="card">
-        <p className="card__numero">15</p>
-        <h1>Procesos zombie</h1>
-      </div>
-      <div className="card">
-        <p className="card__numero">15</p>
-        <h1>Total de procesos</h1>
+    <div className="mt-5 animate__animated animate__fadeIn">
+      <div className="card-container">
+        <div className="card">
+          <p className="card__numero">15</p>
+          <div className="card__subtitle">
+            <h1>Ejecución</h1>
+          </div>
+        </div>
+        <div className="card">
+          <p className="card__numero">15</p>
+          <div className="card__subtitle">
+            <h1>Suspendidos</h1>
+          </div>
+        </div>
+        <div className="card">
+          <p className="card__numero">15</p>
+          <div className="card__subtitle">
+            <h1>Detenidos</h1>
+          </div>
+        </div>
+        <div className="card">
+          <p className="card__numero">15</p>
+          <div className="card__subtitle">
+            <h1>Zombie</h1>
+          </div>
+        </div>
+        <div className="card">
+          <p className="card__numero">15</p>
+          <div className="card__subtitle">
+            <h1>Total</h1>
+          </div>
+        </div>
       </div>
     </div>
   );

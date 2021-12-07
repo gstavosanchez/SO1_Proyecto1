@@ -12,8 +12,8 @@ export const Navbar = () => {
             }
             to="/home"
           >
-            Principal
-            <i className="fas fa-home ml-2 mr-1"></i>
+            <i className="fas fa-home ml-5 mr-2"></i>
+            Inicio
           </NavLink>
           <NavLink
             className={({ isActive }) =>
@@ -21,8 +21,8 @@ export const Navbar = () => {
             }
             to="/cpu"
           >
+            <i className="fas fa-cogs ml-2 mr-2"></i>
             CPU
-            <i className="fas fa-cogs ml-2 mr-1"></i>
           </NavLink>
           <NavLink
             className={({ isActive }) =>
@@ -30,8 +30,8 @@ export const Navbar = () => {
             }
             to="/ram"
           >
+            <i className="fas fa-database ml-2 mr-2"></i>
             RAM
-            <i className="fas fa-database ml-2 mr-1"></i>
           </NavLink>
         </div>
       </div>

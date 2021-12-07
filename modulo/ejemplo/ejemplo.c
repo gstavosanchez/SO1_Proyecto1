@@ -1,26 +1,54 @@
+// Header obligatorio de todos los modulos
 #include <linux/module.h>
+// Header para usar KERN_INFO
+#include <linux/kernel.h>
+// Header para los macros module_init y module_exit
 #include <linux/init.h>
+// Header necesario porque se usara proc_fs
 #include <linux/proc_fs.h>
-#include <linux/sched.h>
-#include <linux/uaccess.h>
-#include <linux/fs.h>
-#include <linux/sysinfo.h>
+/* for copy_from_user */
+#include <asm/uaccess.h>
+/* Header para usar la lib seq_file y manejar el archivo en /proc*/
 #include <linux/seq_file.h>
-#include <linux/slab.h>
-#include <linux/mm.h>
-#include <linux/swap.h>
-#include <linux/timekeeping.h>
 
-MODULE_LICENCE("GPL");
-MODULE_AUTHOR("Gustavo Sanchez")
-MODULE_DESCRIPTION("Modulo que muestra la hora del sistema");
-MODULE_VERSION("0.01");
+MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Ejemplo");
+MODULE_AUTHOR("Elmer Gustavo Sanchez Garcia");
 
-static int __init inicio(void)
+static int escribir_archivo(struct seq_file *file, void *v)
 {
-  // hola mundo
+  seq_printf(file, "*******************************************************\n");
+  seq_printf(file, "*******************************************************\n");
+  seq_printf(file, "**            Laboratorio Sistemas Operativos        **\n");
+  seq_printf(file, "**            Elmer Gustavo Sanchez Garcia           **\n");
+  seq_printf(file, "*******************************************************\n");
+  seq_printf(file, "*******************************************************\n");
+
+  return 0;
 }
 
-// LOAD FUNCTIONS
-MODULE_INIT(inicio)
-MODULE_EXIT(fin)
+static int abrir_proc(struct inode *inode, struct file *file)
+{
+  return single_open(file, escribir_archivo, NULL);
+}
+
+static struct proc_ops archivo_operaciones = {
+    .proc_open = abrir_proc,
+    .proc_read = seq_read};
+
+static int __init ejemplo_init(void)
+{
+  proc_create("ejemplo", 0, NULL, &archivo_operaciones);
+  printk(KERN_INFO "Mensaje al insertar modulo\n");
+
+  return 0;
+}
+
+static void __exit ejemplo_clean(void)
+{
+  remove_proc_entry("ejemplo", NULL);
+  printk(KERN_INFO "El modulo fue retirado\n");
+}
+
+module_init(ejemplo_init);
+module_exit(ejemplo_clean);
