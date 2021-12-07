@@ -1,0 +1,41 @@
+.nav__navbar {
+  background: $dark-grey;
+  height: 55px;
+}
+.nav__contenedor {
+  display: flex;
+  align-items: center;
+}
+.nav__logotipo {
+  font-family: cursive;
+  font-weight: bold;
+  color: $light-grey;
+  font-size: 40px;
+  margin-right: 50px;
+  margin-left: 15px;
+}
+
+.nav__link {
+  margin-right: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  color: $light-grey;
+  transition: 0.3s ease all;
+  font-weight: bold;
+  border-bottom: 3px solid transparent;
+  &:hover,
+  :active {
+    color: white;
+    // border-bottom: 3px solid white;
+  }
+}
+
+.nav__link-active {
+  color: white;
+  // border-bottom: 3px solid white;
+}
+
+.msg__container {
+  height: 100px;
+  overflow-y: auto;
+}

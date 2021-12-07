@@ -1,0 +1,28 @@
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  cursor: pointer;
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fff;
+  font-weight: 700;
+  color: $gris-claro;
+  border: 2px solid transparent;
+  transition: 0.3s ease all;
+  box-shadow: $sombra-clara;
+  &:hover {
+    box-shadow: $sombra;
+    color: $dark-grey;
+  }
+}
+
+.card__numero {
+  font-size: 100px;
+  font-weight: bold;
+}

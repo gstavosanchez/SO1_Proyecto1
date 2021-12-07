@@ -1,0 +1,14 @@
+._input {
+  color: $dark-grey;
+  border: 2px solid $light-grey;
+  // border-bottom: 1px solid $light-grey;
+  font-size: 16px;
+  margin-bottom: 10px;
+  height: 20px;
+  width: 100%;
+  transition: 0.4s ease all;
+  &:focus {
+    border: 2px solid $primary;
+    outline: none;
+  }
+}
