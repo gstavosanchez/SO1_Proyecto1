@@ -5,7 +5,7 @@
 - sudo apt-get install g++
 - sudo apt-get install make
 
-```
+```console
 sudo apt-get install build-essential linux-headers-`uname -r`
 ```
 
