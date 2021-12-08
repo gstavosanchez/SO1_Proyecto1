@@ -1,5 +1,6 @@
-import io from 'socket.io-client';
-const socket = io('http://localhost:4000/');
+import { w3cwebsocket } from 'websocket';
+
+const socket = new w3cwebsocket('ws://localhost:5000/ws');
 
 export default socket;
 

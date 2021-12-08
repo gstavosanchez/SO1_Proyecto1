@@ -5,48 +5,31 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	socketio "github.com/googollee/go-socket.io"
+	"github.com/gorilla/websocket"
 )
 
-type allMsg []string
-
-var msgList = allMsg{}
+var upGrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 // =============================================================================
 // MAIN
 // =============================================================================
 func main() {
-	server := socketio.NewServer(nil)
-
-	//sockets
-	server.OnConnect("/", func(so socketio.Conn) error {
-		so.SetContext("")
-		so.Join("chat_room")
-		fmt.Println("nuevo usuario conectado")
-		// so.Emit("chat message", msgList)
-		return nil
-	})
-
-	server.OnEvent("/", "chat_message", func(so socketio.Conn, msg string) {
-		fmt.Println("msg: ", msg)
-		msgList = append(msgList, msg)
-		// so.Emit("chat message", msgList)
-		server.BroadcastToRoom("chat_room", "chat_message", msg)
-	})
-
-	go server.Serve()
-	defer server.Close()
-
 	router := gin.Default()
-	fmt.Println("Server on port", 4000)
+	fmt.Println("Server on port", 5000)
 	router.Use(GinMiddleware("http://localhost:3000"))
-	router.Static("/public", "./public")
-	router.GET("/socket.io/", gin.WrapH(server))
-	router.GET("/api/data", getHandler)
-	_ = router.Run(":4000")
+	router.GET("/ws", wsEndpoint)
+	router.GET("/hola", getHandler)
+	// router.Static("/public", "./public")
+	// router.GET("/socket.io/", gin.WrapH(server))
 
+	_ = router.Run(":5000")
 }
 
 func GinMiddleware(allowOrigin string) gin.HandlerFunc {
@@ -67,15 +50,6 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 	}
 }
 
-func getHandler(c *gin.Context) {
-	// /proc/ejemplo
-	dataTxt := readFile("/proc/cpu_201801351")
-
-	c.JSON(200, gin.H{
-		"msg": dataTxt,
-	})
-}
-
 // =============================================================================
 // READFILE
 // =============================================================================
@@ -88,4 +62,46 @@ func readFile(path string) string {
 	}
 
 	return string(txtFile)
+}
+
+func getHandler(c *gin.Context) {
+	// /proc/ejemplo
+	dataTxt := readFile("/proc/cpu_201801351")
+
+	c.JSON(200, gin.H{
+		"msg": dataTxt,
+	})
+}
+
+// =============================================================================
+// SOCKET
+// =============================================================================
+
+func wsEndpoint(c *gin.Context) {
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	defer ws.Close()
+	log.Println("Cliente conectado exitosamente")
+	var dataSala struct {
+		Sala string `json:"Sala"`
+	}
+
+	err = ws.ReadJSON(&dataSala)
+	if err != nil {
+		log.Println(err)
+	}
+
+	for {
+
+		err = ws.WriteJSON(struct {
+			Msg string `json:"Msg"`
+		}{Msg: "hola mundo"})
+		if err != nil {
+			log.Println(err)
+		}
+		time.Sleep(1 * time.Second)
+	}
+
 }
