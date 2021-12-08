@@ -25,15 +25,15 @@ func main() {
 		so.SetContext("")
 		so.Join("chat_room")
 		fmt.Println("nuevo usuario conectado")
-		so.Emit("chat message", msgList)
+		// so.Emit("chat message", msgList)
 		return nil
 	})
 
-	server.OnEvent("/", "chat message", func(so socketio.Conn, msg string) {
+	server.OnEvent("/", "chat_message", func(so socketio.Conn, msg string) {
 		fmt.Println("msg: ", msg)
 		msgList = append(msgList, msg)
-		so.Emit("chat message", msgList)
-		server.BroadcastToRoom("chat_room", "chat message", msg)
+		// so.Emit("chat message", msgList)
+		server.BroadcastToRoom("chat_room", "chat_message", msg)
 	})
 
 	go server.Serve()
@@ -42,6 +42,7 @@ func main() {
 	router := gin.Default()
 	fmt.Println("Server on port", 4000)
 	router.Use(GinMiddleware("http://localhost:3000"))
+	router.Static("/public", "./public")
 	router.GET("/socket.io/", gin.WrapH(server))
 	router.GET("/api/data", getHandler)
 	_ = router.Run(":4000")
@@ -68,7 +69,7 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 
 func getHandler(c *gin.Context) {
 	// /proc/ejemplo
-	dataTxt := readFile("hola.txt")
+	dataTxt := readFile("/proc/cpu_201801351")
 
 	c.JSON(200, gin.H{
 		"msg": dataTxt,
