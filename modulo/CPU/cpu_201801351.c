@@ -5,6 +5,7 @@
 #include <linux/sched/signal.h>
 #include <linux/sched.h>
 #include <linux/fs.h>
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Elmer Gustavo Sanchez Garcia");
 MODULE_DESCRIPTION("Modulo de monitor de CPU");
@@ -20,9 +21,11 @@ static int cpu_process(struct seq_file *file, void *v)
   int sleeping = 0;
   int zombie = 0;
   int stopped = 0;
+
   seq_printf(file, "{\n\"processes\":[ ");
   for_each_process(task)
   { // Tareas del SO
+
     seq_printf(file, "{");
     seq_printf(file, "\"pid\":%d,\n", task->pid);
     seq_printf(file, "\"name\":\"%s\",\n", task->comm);
@@ -33,7 +36,10 @@ static int cpu_process(struct seq_file *file, void *v)
     list_for_each(list, &task->children)
     {
       task_child = list_entry(list, struct task_struct, sibling);
-      seq_printf(file, "%d,", task_child->pid);
+      seq_printf(file, "{");
+      seq_printf(file, "id: %d,", task_child->pid);
+      seq_printf(file, "name: %s,", task_child->comm);
+      seq_printf(file, "},");
     }
     seq_printf(file, "]");
 
