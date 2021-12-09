@@ -1,20 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { w3cwebsocket } from 'websocket';
 import { GraphLine } from '../graph/GraphLine';
-// import socket from '../../helpers/socket';
+import { initialState, strToJSON, arraySecond } from './helperRAM';
 
+export const socket = new w3cwebsocket('ws://localhost:5000/ws/ram');
 export const MonitorRAM = () => {
-  const socket = new w3cwebsocket('ws://localhost:5000/ws');
-  socket.onopen = () => {
-    socket.send(
-      JSON.stringify({
-        Sala: 'test',
-      })
-    );
-  };
+  const [ramState, setRamState] = useState(initialState);
+  const [mbList, setMbList] = useState([]);
+  const [percentList, setPercentList] = useState([]);
+  const { ram, porcentaje, uso } = ramState;
 
-  socket.onmessage = (event) => {
-    console.log(`[message] Data received from server: ${event.data}`);
+  socket.onerror = (error) => {
+    console.log(`[error] ${error.message}`);
   };
 
   socket.onclose = (event) => {
@@ -27,6 +24,32 @@ export const MonitorRAM = () => {
     }
   };
 
+  useEffect(() => {
+    socket.onmessage = (e) => {
+      const { data } = JSON.parse(e.data);
+      const json = strToJSON(data);
+      setRamState({
+        ...ramState,
+        ram: json.ram,
+        libre: json.libre,
+        porcentaje: json.porcentaje,
+        uso: json.uso,
+      });
+      setMbList([...mbList, json.uso]);
+      setPercentList([...percentList, json.porcentaje]);
+    };
+  }, [mbList, percentList, ramState]);
+
+  useEffect(() => {
+    socket.onopen = () => {
+      socket.send(
+        JSON.stringify({
+          Sala: 'test',
+        })
+      );
+    };
+  }, []);
+
   return (
     <div className="ram__container animate__animated animate__fadeIn">
       <div className="ram__card">
@@ -35,9 +58,9 @@ export const MonitorRAM = () => {
             <h1>Uso Ram</h1>
             <i className="fas fa-memory icon-size ml-5"></i>
           </div>
-          <p className="mb-1">Total: 11111 MB</p>
-          <p className="mb-1">Uso: 11111MB</p>
-          <p className="mb-5">Porcetanje: 45%</p>
+          <p className="mb-1">Total: {ram} MB</p>
+          <p className="mb-1">Uso: {uso} MB</p>
+          <p className="mb-5">Porcetanje: {porcentaje} %</p>
         </div>
       </div>
       <div className="ram_graph-container">
@@ -47,11 +70,7 @@ export const MonitorRAM = () => {
               <h1>Historial de Uso (%)</h1>
               <i className="fas fa-file-medical-alt icon-size ml-5"></i>
             </div>
-            <GraphLine
-              labels={['a', 'b', 'c', 'd', 'f']}
-              value={[1, 2, 3, 4, 5]}
-              title="hola mundo"
-            />
+            <GraphLine labels={arraySecond} value={percentList} title="% RAM" />
           </div>
         </div>
         <div className="ram_graph-2">
@@ -60,11 +79,7 @@ export const MonitorRAM = () => {
               <h1>Historial de Uso (MB)</h1>
               <i className="fas fa-file-medical-alt icon-size ml-5"></i>
             </div>
-            <GraphLine
-              labels={['a', 'b', 'c', 'd', 'f']}
-              value={[1, 2, 3, 4, 5]}
-              title="RAM"
-            />
+            <GraphLine labels={arraySecond} value={mbList} title="RAM (MB)" />
           </div>
         </div>
       </div>

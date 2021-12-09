@@ -26,10 +26,10 @@ static int get_information(struct seq_file *file_proc, void *v)
     pages[lru] = global_numa_state(NR_LRU_BASE + lru);
 
   seq_printf(file_proc, "{");
-  seq_printf(file_proc, "\"ram\": %8lu,", K(i.totalram) / 1024);
-  seq_printf(file_proc, "\"libre\": %8lu,", K(i.freeram) / 1024);
-  seq_printf(file_proc, "\"uso\": %8lu,", (K(i.totalram) - K(i.freeram) - K(i.bufferram)) / 1024);
-  seq_printf(file_proc, "\"porcentaje\": %8lu", (((K(i.totalram) - K(i.freeram) - K(i.bufferram)) / 1024) * 100) / (K(i.totalram) / 1024));
+  seq_printf(file_proc, "'ram': %lu,", K(i.totalram) / 1024);
+  seq_printf(file_proc, "'libre': %lu,", K(i.freeram) / 1024);
+  seq_printf(file_proc, "'uso': %lu,", (K(i.totalram) - K(i.freeram) - K(i.bufferram)) / 1024);
+  seq_printf(file_proc, "'porcentaje': %lu", (((K(i.totalram) - K(i.freeram) - K(i.bufferram)) / 1024) * 100) / (K(i.totalram) / 1024));
   seq_printf(file_proc, "}\n");
 #undef K
 

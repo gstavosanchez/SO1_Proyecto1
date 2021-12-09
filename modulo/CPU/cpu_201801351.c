@@ -37,8 +37,8 @@ static int cpu_process(struct seq_file *file, void *v)
     {
       task_child = list_entry(list, struct task_struct, sibling);
       seq_printf(file, "{");
-      seq_printf(file, "id: %d,", task_child->pid);
-      seq_printf(file, "name: %s,", task_child->comm);
+      seq_printf(file, "\"id\": %d,", task_child->pid);
+      seq_printf(file, "\"name\": \"%s\"", task_child->comm);
       seq_printf(file, "},");
     }
     seq_printf(file, "]");
@@ -46,25 +46,30 @@ static int cpu_process(struct seq_file *file, void *v)
     switch (task->state)
     {
     case 0:
-    case 2:
       running++;
       break;
+
     case 1:
+      sleeping++;
+      break;
+
+      // case 5:
+      //   stopped++;
+      //   break;
+
+    case 128:
+      zombie++;
+      break;
+
     case 1026:
       sleeping++;
       break;
-    case 4:
-      zombie++;
-      break;
-    case 5:
-      stopped++;
-      break;
+
     default:
       break;
     }
     seq_printf(file, "},\n");
   }
-  seq_printf(file, "{}\n");
   seq_printf(file, "],\n");
   seq_printf(file, "\"process_running\":%d,\n", running);
   seq_printf(file, "\"process_sleeping\":%d,\n", sleeping);
@@ -72,6 +77,7 @@ static int cpu_process(struct seq_file *file, void *v)
   seq_printf(file, "\"process_stopped\":%d,\n", stopped);
   seq_printf(file, "\"total_processes\":%d\n", (running + sleeping + zombie + stopped));
   seq_printf(file, "}\n");
+
   return 0;
 }
 static int open_f(struct inode *inode, struct file *file)

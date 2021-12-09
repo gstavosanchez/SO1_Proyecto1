@@ -5,16 +5,24 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
+// cpuModule := "/proc/cpu_201801351"
+// memoModule := "/proc/memo_201801351"
+
 var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+type dataJson struct {
+	Data string `json:"data"`
 }
 
 // =============================================================================
@@ -24,7 +32,8 @@ func main() {
 	router := gin.Default()
 	fmt.Println("Server on port", 5000)
 	router.Use(GinMiddleware("http://localhost:3000"))
-	router.GET("/ws", wsEndpoint)
+	router.GET("/ws/ram", wsRAM)
+	router.GET("/ws/cpu", wsCPU)
 	router.GET("/hola", getHandler)
 	// router.Static("/public", "./public")
 	// router.GET("/socket.io/", gin.WrapH(server))
@@ -49,10 +58,22 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 		c.Next()
 	}
 }
+func getHandler(c *gin.Context) {
+	// /proc/ejemplo
+	dataTxt := readFile("/proc/cpu_201801351")
+
+	dataReplace := replaceSTR(dataTxt)
+
+	fmt.Println(dataReplace)
+	c.JSON(200, gin.H{
+		"value": dataReplace,
+	})
+}
 
 // =============================================================================
-// READFILE
+// HELPERS
 // =============================================================================
+/* -------------- -> READFILE <- -------------- */
 func readFile(path string) string {
 	txtFile, err := ioutil.ReadFile(path)
 
@@ -64,20 +85,23 @@ func readFile(path string) string {
 	return string(txtFile)
 }
 
-func getHandler(c *gin.Context) {
-	// /proc/ejemplo
-	dataTxt := readFile("/proc/cpu_201801351")
-
-	c.JSON(200, gin.H{
-		"msg": dataTxt,
-	})
+/* -------------- -> REPLACE <- -------------- */
+func replaceSTR(dataStr string) string {
+	/*
+		Replace: ]},] -> ]}]
+		Replace: ,] -> ]
+	*/
+	str := strings.ReplaceAll(dataStr, "\n", "")
+	str1 := strings.Replace(str, "]},]", "]}]", -1)
+	strReturn := strings.Replace(str1, ",]", "]", -1)
+	return strReturn
 }
 
 // =============================================================================
 // SOCKET
 // =============================================================================
 
-func wsEndpoint(c *gin.Context) {
+func wsRAM(c *gin.Context) {
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Println(err)
@@ -94,10 +118,10 @@ func wsEndpoint(c *gin.Context) {
 	}
 
 	for {
+		var newData dataJson
+		newData.Data = readFile("/proc/memo_201801351")
 
-		err = ws.WriteJSON(struct {
-			Msg string `json:"Msg"`
-		}{Msg: "hola mundo"})
+		err = ws.WriteJSON(newData)
 		if err != nil {
 			log.Println(err)
 		}
@@ -105,3 +129,34 @@ func wsEndpoint(c *gin.Context) {
 	}
 
 }
+
+func wsCPU(c *gin.Context) {
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	defer ws.Close()
+	log.Println("Cliente conectado exitosamente")
+	var dataSala struct {
+		Sala string `json:"Sala"`
+	}
+
+	err = ws.ReadJSON(&dataSala)
+	if err != nil {
+		log.Println(err)
+	}
+
+	for {
+		var newData dataJson
+		newData.Data = replaceSTR(readFile("/proc/cpu_201801351"))
+		err = ws.WriteJSON(newData)
+		if err != nil {
+			log.Println(err)
+		}
+		time.Sleep(2 * time.Second)
+	}
+
+}
+
+// sudo kill $(sudo lsof -t -i:5000)
+// sudo netstat -lnp -> ver los puetos
