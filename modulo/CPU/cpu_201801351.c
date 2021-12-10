@@ -29,7 +29,7 @@ static int cpu_process(struct seq_file *file, void *v)
     seq_printf(file, "{");
     seq_printf(file, "\"pid\":%d,\n", task->pid);
     seq_printf(file, "\"name\":\"%s\",\n", task->comm);
-    seq_printf(file, "\"user\": %u,\n", task->cred->uid.val);
+    seq_printf(file, "\"user\": <%u>,\n", task->cred->uid.val);
     seq_printf(file, "\"state\":%ld,\n", task->state);
 
     seq_printf(file, "\"children\":[");
@@ -56,6 +56,8 @@ static int cpu_process(struct seq_file *file, void *v)
       // case 5:
       //   stopped++;
       //   break;
+
+      // less /etc/passwd
 
     case 128:
       zombie++;
@@ -101,3 +103,5 @@ static void __exit event_exit(void)
 }
 module_init(event_init);
 module_exit(event_exit);
+
+// getent passwd userID | cut -d: -f1

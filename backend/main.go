@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -94,7 +95,48 @@ func replaceSTR(dataStr string) string {
 	str := strings.ReplaceAll(dataStr, "\n", "")
 	str1 := strings.Replace(str, "]},]", "]}]", -1)
 	strReturn := strings.Replace(str1, ",]", "]", -1)
-	return strReturn
+	return searchUserInStr(strReturn)
+}
+
+func searchUserInStr(dataStr string) string {
+	var newString strings.Builder
+	var idUser strings.Builder
+	isUser := false
+
+	for _, val := range dataStr {
+		if isUser {
+
+			if string(val) == ">" {
+				isUser = false
+				userName := getNameUser(idUser.String())
+				newString.WriteString(userName)
+				idUser.Reset()
+			} else {
+				idUser.WriteString(string(val))
+			}
+
+		} else {
+
+			if string(val) == "<" {
+				isUser = true
+			} else {
+				newString.WriteString(string(val))
+			}
+		}
+
+	}
+	return newString.String()
+}
+
+func getNameUser(userId string) string {
+	cmd := exec.Command("sh", "-c", "getent passwd "+userId+" | cut -d: -f1")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("error userId ", userId, " no existe")
+		return "\"gustavo\""
+	}
+	output := string(out[:])
+	return "\"" + strings.ReplaceAll(output, "\n", "") + "\""
 }
 
 // =============================================================================
@@ -160,3 +202,4 @@ func wsCPU(c *gin.Context) {
 
 // sudo kill $(sudo lsof -t -i:5000)
 // sudo netstat -lnp -> ver los puetos
+// getent passwd 1000 | cut -d: -f1 -> ver username
