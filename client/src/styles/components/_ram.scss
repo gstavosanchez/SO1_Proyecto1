@@ -5,30 +5,16 @@
 
 .ram__card {
   width: 20%;
-  // height: 50px;
-}
-.ram_graph-container {
-  display: grid;
-  grid-gap: 15px;
-  width: 75%;
-  margin-left: 10px;
-  grid-template-columns: 1fr;
-  height: 1000px;
+  margin: auto 0px;
 }
 
 .ram_graph-1 {
-  margin-left: 15px;
-  width: 1000px;
+  margin: 0px auto;
+  width: 950px;
 }
-.ram_graph-2 {
-  margin-left: 15px;
-  width: 1000px;
-}
+
 @media only screen and (max-width: 1326px) {
   .ram_graph-1 {
-    width: 900px;
-  }
-  .ram_graph-2 {
     width: 900px;
   }
 }

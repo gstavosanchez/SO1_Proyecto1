@@ -33,6 +33,7 @@ export const Home = () => {
         zombie: json.process_zombie,
         detenidos: json.process_stopped,
         total: json.total_processes,
+        procesList: json.processes,
       });
     };
   }, [proceso]);
@@ -50,7 +51,7 @@ export const Home = () => {
   return (
     <div className="home__container animate__animated animate__fadeIn">
       <Procesos {...proceso} />
-      <ProcesoLista />
+      <ProcesoLista procesList={proceso.procesList} />
     </div>
   );
 };

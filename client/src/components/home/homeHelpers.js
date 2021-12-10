@@ -4,4 +4,5 @@ export const initialState = {
   detenidos: 0,
   zombie: 0,
   total: 0,
+  procesList: [],
 };

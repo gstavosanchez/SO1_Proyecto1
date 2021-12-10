@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { w3cwebsocket } from 'websocket';
 import { GraphLine } from '../graph/GraphLine';
-import { initialState, strToJSON, arraySecond } from './helperRAM';
+import { initialState, arraySecond } from './helperRAM';
 
 export const socket = new w3cwebsocket('ws://localhost:5000/ws/ram');
+
 export const MonitorRAM = () => {
   const [ramState, setRamState] = useState(initialState);
   const [mbList, setMbList] = useState([]);
-  const [percentList, setPercentList] = useState([]);
+
   const { ram, porcentaje, uso } = ramState;
 
   socket.onerror = (error) => {
@@ -27,18 +28,17 @@ export const MonitorRAM = () => {
   useEffect(() => {
     socket.onmessage = (e) => {
       const { data } = JSON.parse(e.data);
-      const json = strToJSON(data);
       setRamState({
         ...ramState,
-        ram: json.ram,
-        libre: json.libre,
-        porcentaje: json.porcentaje,
-        uso: json.uso,
+        ram: data.ram,
+        porcentaje: data.porcentaje,
+        uso: data.uso,
       });
-      setMbList([...mbList, json.uso]);
-      setPercentList([...percentList, json.porcentaje]);
+
+      setMbList([...mbList, data.uso]);
+      // setTimeList([...timeList, getMinute()]);
     };
-  }, [mbList, percentList, ramState]);
+  }, [ramState, mbList]);
 
   useEffect(() => {
     socket.onopen = () => {
@@ -63,24 +63,13 @@ export const MonitorRAM = () => {
           <p className="mb-5">Porcetanje: {porcentaje} %</p>
         </div>
       </div>
-      <div className="ram_graph-container">
-        <div className="ram_graph-1">
-          <div className="card card__active">
-            <div className="card__subtitle-grap mb-1 mb-1">
-              <h1>Historial de Uso (%)</h1>
-              <i className="fas fa-file-medical-alt icon-size ml-5"></i>
-            </div>
-            <GraphLine labels={arraySecond} value={percentList} title="% RAM" />
+      <div className="ram_graph-1">
+        <div className="card card__active">
+          <div className="card__subtitle-grap mb-1 mb-1">
+            <h1>Historial de Uso (MB)</h1>
+            <i className="fas fa-file-medical-alt icon-size ml-5"></i>
           </div>
-        </div>
-        <div className="ram_graph-2">
-          <div className="card card__active">
-            <div className="card__subtitle-grap mb-1 mb-1">
-              <h1>Historial de Uso (MB)</h1>
-              <i className="fas fa-file-medical-alt icon-size ml-5"></i>
-            </div>
-            <GraphLine labels={arraySecond} value={mbList} title="RAM (MB)" />
-          </div>
+          <GraphLine value={mbList} labels={arraySecond} title="RAM (MB)" />
         </div>
       </div>
     </div>

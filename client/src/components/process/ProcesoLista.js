@@ -1,6 +1,5 @@
-import React from 'react';
-
-export const ProcesoLista = () => {
+import PropTypes from 'prop-types';
+export const ProcesoLista = ({ procesList }) => {
   return (
     <>
       <table className="content-table animate__animated animate__fadeIn">
@@ -15,63 +14,24 @@ export const ProcesoLista = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th>1</th>
-            <th>systemd</th>
-            <th>root</th>
-            <th>S</th>
-            <th>2.2</th>
-            <th>
-              <i className="fas fa-pen icon-color mr-1"></i>
-              <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
-            </th>
-          </tr>
-          <tr>
-            <th>2</th>
-            <th>systemd</th>
-            <th>root</th>
-            <th>S</th>
-            <th>2.2</th>
-            <th>
-              <i className="fas fa-pen icon-color mr-1"></i>
-              <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
-            </th>
-          </tr>
-          <tr>
-            <th>3</th>
-            <th>systemd</th>
-            <th>root</th>
-            <th>S</th>
-            <th>2.2</th>
-            <th>
-              <i className="fas fa-pen icon-color mr-1"></i>
-              <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
-            </th>
-          </tr>
-          <tr>
-            <th>4</th>
-            <th>systemd</th>
-            <th>root</th>
-            <th>S</th>
-            <th>2.2</th>
-            <th>
-              <i className="fas fa-pen icon-color mr-1"></i>
-              <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
-            </th>
-          </tr>
-          <tr>
-            <th>5</th>
-            <th>systemd</th>
-            <th>root</th>
-            <th>S</th>
-            <th>2.2</th>
-            <th>
-              <i className="fas fa-pen icon-color mr-1"></i>
-              <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
-            </th>
-          </tr>
+          {procesList.map((value, i) => (
+            <tr key={i}>
+              <th>{value.pid}</th>
+              <th>{value.name}</th>
+              <th>{value.user}</th>
+              <th>{value.state}</th>
+              <th>2.2</th>
+              <th>
+                <i className="fas fa-pen icon-color mr-1"></i>
+                <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
+              </th>
+            </tr>
+          ))}
         </tbody>
       </table>
     </>
   );
+};
+ProcesoLista.propTypes = {
+  procesList: PropTypes.array.isRequired,
 };

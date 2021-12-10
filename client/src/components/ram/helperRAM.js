@@ -4,7 +4,7 @@ export const initialState = {
   uso: 0,
   porcentaje: 0,
 };
-export const arraySecond = [...Array(61).keys()].sort((a, b) => b - a);
+export const arraySecond = [...Array(100).keys()].sort((a, b) => b - a);
 
 export const strToJSON = (dataStr) => {
   // {'ram': 11893,'libre': 2158,'uso': 9354,'porcentaje': 78}
@@ -22,4 +22,10 @@ export const strToJSON = (dataStr) => {
     uso: parseInt(usoSplit[1].trim()),
     porcentaje: parseInt(porcentSplit[1].trim()),
   };
+};
+
+export const getMinute = () => {
+  const today = new Date();
+  const minute = today.getMinutes() + ':' + today.getSeconds();
+  return minute;
 };

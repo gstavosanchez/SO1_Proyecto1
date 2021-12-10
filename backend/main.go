@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +26,16 @@ var upGrader = websocket.Upgrader{
 
 type dataJson struct {
 	Data string `json:"data"`
+}
+
+type DataJsonRam struct {
+	Data MemoryRAM `json:"data"`
+}
+
+type MemoryRAM struct {
+	Ram        float64 `json:"ram"`
+	Uso        float64 `json:"uso"`
+	Porcentaje float64 `json:"porcentaje"`
 }
 
 // =============================================================================
@@ -61,13 +73,19 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 }
 func getHandler(c *gin.Context) {
 	// /proc/ejemplo
-	dataTxt := readFile("/proc/cpu_201801351")
+	// dataTxt := readFile("/proc/cpu_201801351")
 
-	dataReplace := replaceSTR(dataTxt)
+	// dataReplace := replaceSTR(dataTxt)
 
-	fmt.Println(dataReplace)
+	// fmt.Println(dataReplace)
+	// c.JSON(200, gin.H{
+	// 	"value": dataReplace,
+	// })
+
+	// datatxt := getMemoryCache()
+
 	c.JSON(200, gin.H{
-		"value": dataReplace,
+		"value": "hola mundo",
 	})
 }
 
@@ -98,6 +116,23 @@ func replaceSTR(dataStr string) string {
 	return searchUserInStr(strReturn)
 }
 
+/* -------------- -> PARSE INT <- -------------- */
+func parseInt(data string) int {
+	intVar, err := strconv.Atoi(data)
+	if err != nil {
+		return 0
+	}
+
+	return intVar
+}
+
+/* -------------- -> REDONDEAR <- -------------- */
+func roundTo(n float64, decimals uint32) float64 {
+	return math.Round(n*math.Pow(10, float64(decimals))) / math.Pow(10, float64(decimals))
+}
+
+/* ----------------------------------------- */
+/* -------------- -> USER  <- -------------- */
 func searchUserInStr(dataStr string) string {
 	var newString strings.Builder
 	var idUser strings.Builder
@@ -139,6 +174,44 @@ func getNameUser(userId string) string {
 	return "\"" + strings.ReplaceAll(output, "\n", "") + "\""
 }
 
+/* -------------- -> MEMORY RAM <- -------------- */
+func getMemoryCache() int {
+	cmd := exec.Command("sh", "-c", "free -m | awk '{print $6}'| head -2| tail -1")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Invalid commmand")
+		return 0
+	}
+	cache := strings.ReplaceAll(string(out[:]), "\n", "")
+
+	return parseInt(cache)
+}
+
+func getRamData() MemoryRAM {
+	dataStr := readFile("/proc/memo_201801351")
+	var memory MemoryRAM
+	cache := getMemoryCache()
+	total, uso := splitDataRam(dataStr)
+
+	memory.Ram = float64(total)
+	memory.Uso = float64(uso - cache)
+	memory.Porcentaje = roundTo(((memory.Uso * 100) / memory.Ram), 2)
+
+	return memory
+}
+
+func splitDataRam(data string) (int, int) {
+	dataList := strings.Split(data, ",")
+
+	splitRam := strings.Split(dataList[0], ":")
+	totalRam := strings.TrimSpace(splitRam[1])
+
+	splitUso := strings.Split(dataList[1], ":")
+	usoRam := strings.TrimSpace(splitUso[1])
+
+	return parseInt(totalRam), parseInt(usoRam)
+}
+
 // =============================================================================
 // SOCKET
 // =============================================================================
@@ -160,8 +233,8 @@ func wsRAM(c *gin.Context) {
 	}
 
 	for {
-		var newData dataJson
-		newData.Data = readFile("/proc/memo_201801351")
+		var newData DataJsonRam
+		newData.Data = getRamData()
 
 		err = ws.WriteJSON(newData)
 		if err != nil {
@@ -203,3 +276,4 @@ func wsCPU(c *gin.Context) {
 // sudo kill $(sudo lsof -t -i:5000)
 // sudo netstat -lnp -> ver los puetos
 // getent passwd 1000 | cut -d: -f1 -> ver username
+// free -m | awk '{print $6}'| head -2| tail -1
