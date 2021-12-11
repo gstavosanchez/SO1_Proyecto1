@@ -1,10 +1,10 @@
-export const Procesos = ({
-  ejecucion,
-  suspendidos,
-  detenidos,
-  zombie,
-  total,
-}) => {
+import { useContext } from 'react';
+import { ProcesoContext } from '../../context/process/ProcesoContext';
+
+export const Procesos = () => {
+  const { procesState } = useContext(ProcesoContext);
+  const { ejecucion, suspendidos, detenidos, zombie, total } = procesState;
+
   return (
     <div className="mt-5 animate__animated animate__fadeIn">
       <div className="card-container">

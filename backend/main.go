@@ -126,6 +126,16 @@ func parseInt(data string) int {
 	return intVar
 }
 
+/* -------------- -> PARSE FLOAT <- -------------- */
+func parseFloat(data string) float64 {
+	val, err := strconv.ParseFloat(data, 64)
+	if err != nil {
+		return 0.0
+	}
+
+	return val
+}
+
 /* -------------- -> REDONDEAR <- -------------- */
 func roundTo(n float64, decimals uint32) float64 {
 	return math.Round(n*math.Pow(10, float64(decimals))) / math.Pow(10, float64(decimals))
@@ -136,7 +146,10 @@ func roundTo(n float64, decimals uint32) float64 {
 func searchUserInStr(dataStr string) string {
 	var newString strings.Builder
 	var idUser strings.Builder
+	var ram strings.Builder
+
 	isUser := false
+	isRam := false
 
 	for _, val := range dataStr {
 		if isUser {
@@ -150,10 +163,23 @@ func searchUserInStr(dataStr string) string {
 				idUser.WriteString(string(val))
 			}
 
+		} else if isRam {
+
+			if string(val) == "$" {
+				isRam = false
+				ramValue := getPorcentajeRam(ram.String())
+				newString.WriteString(ramValue)
+				ram.Reset()
+			} else {
+				ram.WriteString(string(val))
+			}
+
 		} else {
 
 			if string(val) == "<" {
 				isUser = true
+			} else if string(val) == "@" {
+				isRam = true
 			} else {
 				newString.WriteString(string(val))
 			}
@@ -212,6 +238,20 @@ func splitDataRam(data string) (int, int) {
 	return parseInt(totalRam), parseInt(usoRam)
 }
 
+func getPorcentajeRam(data string) string {
+	// // 11893 -> ram
+	bytesRam := parseFloat(data)
+	var ram float64 = 11893
+
+	if bytesRam == 0 {
+		return "0"
+	}
+
+	porcentaje := roundTo(((bytesRam / 10000) / ram), 2)
+
+	return fmt.Sprint(porcentaje)
+}
+
 // =============================================================================
 // SOCKET
 // =============================================================================
@@ -268,7 +308,7 @@ func wsCPU(c *gin.Context) {
 		if err != nil {
 			log.Println(err)
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 
 }
@@ -277,3 +317,19 @@ func wsCPU(c *gin.Context) {
 // sudo netstat -lnp -> ver los puetos
 // getent passwd 1000 | cut -d: -f1 -> ver username
 // free -m | awk '{print $6}'| head -2| tail -1
+
+/*
+Hacer un EDT sobre
+la fiesta de aniversario de la universidad
+
+Proveedores
+gestion de invitados
+definir localidad
+comida
+enviar invitaciones
+Cotizaciones
+los eventos relacionados con el aniversario
+Recursos
+Presupuesto
+Interesados
+*/

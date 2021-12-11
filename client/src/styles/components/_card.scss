@@ -52,6 +52,15 @@
   align-items: center;
 }
 
+.card__subtitle-space {
+  display: flex;
+  padding: 5px;
+  width: 100%;
+  height: 50px;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .card__subtitle-grap {
   display: flex;
   padding: 5px;

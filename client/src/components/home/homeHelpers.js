@@ -5,4 +5,5 @@ export const initialState = {
   zombie: 0,
   total: 0,
   procesList: [],
+  selectedProces: null,
 };

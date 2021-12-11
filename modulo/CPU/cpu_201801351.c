@@ -5,6 +5,7 @@
 #include <linux/sched/signal.h>
 #include <linux/sched.h>
 #include <linux/fs.h>
+#include <linux/mm.h> // get_mm_rss()
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Elmer Gustavo Sanchez Garcia");
@@ -21,16 +22,28 @@ static int cpu_process(struct seq_file *file, void *v)
   int sleeping = 0;
   int zombie = 0;
   int stopped = 0;
+  unsigned long rss;
 
   seq_printf(file, "{\n\"processes\":[ ");
   for_each_process(task)
   { // Tareas del SO
+    get_task_struct(task);
 
     seq_printf(file, "{");
     seq_printf(file, "\"pid\":%d,\n", task->pid);
     seq_printf(file, "\"name\":\"%s\",\n", task->comm);
     seq_printf(file, "\"user\": <%u>,\n", task->cred->uid.val);
     seq_printf(file, "\"state\":%ld,\n", task->state);
+    if (task->mm)
+    {
+      // 11893 -> ram
+      rss = get_mm_rss(task->mm) << PAGE_SHIFT;
+      seq_printf(file, "\"ram\": @%lu$,\n", rss);
+    }
+    else
+    {
+      seq_printf(file, "\"ram\":%d,\n", 0);
+    }
 
     seq_printf(file, "\"children\":[");
     list_for_each(list, &task->children)

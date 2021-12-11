@@ -1,5 +1,17 @@
-import PropTypes from 'prop-types';
-export const ProcesoLista = ({ procesList }) => {
+import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ProcesoContext } from '../../context/process/ProcesoContext';
+
+export const ProcesoLista = () => {
+  const navigate = useNavigate();
+  const { procesState, setProcesSelected } = useContext(ProcesoContext);
+  const { procesList } = procesState;
+
+  const handleClickProces = (proces) => {
+    setProcesSelected(proces);
+    navigate('/proces/selected');
+  };
+
   return (
     <>
       <table className="content-table animate__animated animate__fadeIn">
@@ -20,10 +32,13 @@ export const ProcesoLista = ({ procesList }) => {
               <th>{value.name}</th>
               <th>{value.user}</th>
               <th>{value.state}</th>
-              <th>2.2</th>
+              <th>{value.ram}</th>
               <th>
-                <i className="fas fa-pen icon-color mr-1"></i>
-                <i className="fas fa-skull-crossbones icon-color-red ml-5"></i>
+                <button
+                  className="fas fa-pen icon-t icon-color button-icon mr-1"
+                  onClick={() => handleClickProces(value)}
+                ></button>
+                <i className="fas fa-skull-crossbones icon-t icon-color-red ml-5"></i>
               </th>
             </tr>
           ))}
@@ -32,6 +47,6 @@ export const ProcesoLista = ({ procesList }) => {
     </>
   );
 };
-ProcesoLista.propTypes = {
-  procesList: PropTypes.array.isRequired,
-};
+// ProcesoLista.propTypes = {
+//   procesList: PropTypes.array.isRequired,
+// };
