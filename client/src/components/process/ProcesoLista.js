@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { ProcesoContext } from '../../context/process/ProcesoContext';
 
 export const ProcesoLista = () => {
@@ -10,6 +11,11 @@ export const ProcesoLista = () => {
   const handleClickProces = (proces) => {
     setProcesSelected(proces);
     navigate('/proces/selected');
+  };
+
+  const handleDelete = (id, name) => {
+    toast.dark(`Kill process ${name}`);
+    console.log(id);
   };
 
   return (
@@ -35,10 +41,15 @@ export const ProcesoLista = () => {
               <th>{value.ram}</th>
               <th>
                 <button
-                  className="fas fa-pen icon-t icon-color button-icon mr-1"
+                  className="fas fa-pen icon-t button button-more mr-1"
+                  style={{ cursor: 'pointer' }}
                   onClick={() => handleClickProces(value)}
                 ></button>
-                <i className="fas fa-skull-crossbones icon-t icon-color-red ml-5"></i>
+                <button
+                  className="fas fa-skull-crossbones icon-t button button-kill ml-5"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleDelete(value.pid, value.name)}
+                ></button>
               </th>
             </tr>
           ))}

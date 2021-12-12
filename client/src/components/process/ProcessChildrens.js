@@ -20,7 +20,7 @@ export const ProcessChildrens = () => {
         <p className="mb-1">RAM: {ram} %</p>
       </div>
       {children.map((value) => (
-        <div className="card" key={value.id}>
+        <div className="card" key={value.id} data-aos="zoom-in">
           <div className="card__subtitle-space mb-1 mb-1">
             <h1>ID: {value.id}</h1>
             <i className="fas fa-microchip icon-size ml-5"></i>

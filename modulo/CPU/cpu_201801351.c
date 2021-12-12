@@ -66,12 +66,6 @@ static int cpu_process(struct seq_file *file, void *v)
       sleeping++;
       break;
 
-      // case 5:
-      //   stopped++;
-      //   break;
-
-      // less /etc/passwd
-
     case 128:
       zombie++;
       break;
@@ -81,6 +75,7 @@ static int cpu_process(struct seq_file *file, void *v)
       break;
 
     default:
+      stopped++;
       break;
     }
     seq_printf(file, "},\n");
@@ -118,3 +113,4 @@ module_init(event_init);
 module_exit(event_exit);
 
 // getent passwd userID | cut -d: -f1
+// top -> ver procesos

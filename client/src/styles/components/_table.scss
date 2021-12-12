@@ -41,18 +41,28 @@
   color: $dark-grey;
 }
 
-.icon-color-red {
-  color: red;
-}
-
-.icon-color-blue {
-  color: blue;
-}
-
-.button-icon {
+.button {
   border: none;
   background: transparent;
+  transition: 0.3s ease all;
 }
+
+.button-more {
+  color: black;
+  transition: 0.3s ease all;
+  &:hover {
+    color: lighten($color: black, $amount: 20);
+  }
+}
+
+.button-kill {
+  color: red;
+  transition: 0.3s ease all;
+  &:hover {
+    color: darken($color: red, $amount: 10);
+  }
+}
+
 .icon-t {
   font-size: 22px;
 }

@@ -32,10 +32,17 @@ type DataJsonRam struct {
 	Data MemoryRAM `json:"data"`
 }
 
+type DataJsonCPU struct {
+	Data DataCPU `json:"data"`
+}
+
 type MemoryRAM struct {
 	Ram        float64 `json:"ram"`
 	Uso        float64 `json:"uso"`
 	Porcentaje float64 `json:"porcentaje"`
+}
+type DataCPU struct {
+	Uso string `json:"uso"`
 }
 
 // =============================================================================
@@ -47,9 +54,9 @@ func main() {
 	router.Use(GinMiddleware("http://localhost:3000"))
 	router.GET("/ws/ram", wsRAM)
 	router.GET("/ws/cpu", wsCPU)
+	router.GET("/ws/uso/cpu", wsUsoCPU)
 	router.GET("/hola", getHandler)
 	// router.Static("/public", "./public")
-	// router.GET("/socket.io/", gin.WrapH(server))
 
 	_ = router.Run(":5000")
 }
@@ -82,10 +89,11 @@ func getHandler(c *gin.Context) {
 	// 	"value": dataReplace,
 	// })
 
-	// datatxt := getMemoryCache()
+	dataTxt := getDataCPU()
+	// getDataCPU()
 
 	c.JSON(200, gin.H{
-		"value": "hola mundo",
+		"value": dataTxt,
 	})
 }
 
@@ -252,6 +260,30 @@ func getPorcentajeRam(data string) string {
 	return fmt.Sprint(porcentaje)
 }
 
+/* -------------- -> CPU <- -------------- */
+func getPorcentCPU() string {
+	cmd := exec.Command("sh", "-c", "ps -eo pcpu | sort -k 1 -r | head -50")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Invalid commmand")
+		return ""
+	}
+
+	cpu := strings.ReplaceAll(string(out[:]), "%CPU\n", "")
+	cpu = strings.ReplaceAll(cpu, "\n", ",")
+	return cpu
+}
+
+func getDataCPU() DataCPU {
+	dataCpu := getPorcentCPU()
+	total := 0.0
+	for _, value := range strings.Split(dataCpu, ",") {
+		dataFloat := parseFloat(strings.TrimSpace(value))
+		total += dataFloat
+	}
+	return DataCPU{Uso: fmt.Sprint(roundTo(total/4, 2))}
+}
+
 // =============================================================================
 // SOCKET
 // =============================================================================
@@ -311,6 +343,33 @@ func wsCPU(c *gin.Context) {
 		time.Sleep(3 * time.Second)
 	}
 
+}
+
+func wsUsoCPU(c *gin.Context) {
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	defer ws.Close()
+	log.Println("Cliente conectado exitosamente")
+	var dataSala struct {
+		Sala string `json:"Sala"`
+	}
+
+	err = ws.ReadJSON(&dataSala)
+	if err != nil {
+		log.Println(err)
+	}
+
+	for {
+		var newData DataJsonCPU
+		newData.Data = getDataCPU()
+		err = ws.WriteJSON(newData)
+		if err != nil {
+			log.Println(err)
+		}
+		time.Sleep(1 * time.Second)
+	}
 }
 
 // sudo kill $(sudo lsof -t -i:5000)
