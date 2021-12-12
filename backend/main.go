@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -106,6 +108,10 @@ func handlerKill(c *gin.Context) {
 // =============================================================================
 /* -------------- -> READFILE <- -------------- */
 func readFile(path string) string {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		fmt.Println("Not exist ", path)
+		return ""
+	}
 	txtFile, err := ioutil.ReadFile(path)
 
 	if err != nil {
