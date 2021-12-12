@@ -19,6 +19,11 @@ export const procesoReducer = (state, action) => {
         ...state,
         selectedProces: payload,
       };
+    case types.kill:
+      return {
+        ...state,
+        killProces: payload,
+      };
     default:
       return state;
   }

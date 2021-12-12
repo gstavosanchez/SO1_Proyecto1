@@ -18,7 +18,8 @@ export const Home = () => {
   socket.onclose = (event) => {
     if (event.wasClean) {
       console.log(
-        `[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`
+        `[close] Connection closed cleanly, 
+        code=${event.code} reason=${event.reason}`
       );
     } else {
       console.log('[close] Connection died');
@@ -28,7 +29,6 @@ export const Home = () => {
   useEffect(() => {
     socket.onmessage = (e) => {
       const json = JSON.parse(JSON.parse(e.data).data);
-      console.log(json);
       const procesoJson = {
         ejecucion: json.process_running,
         suspendidos: json.process_sleeping,

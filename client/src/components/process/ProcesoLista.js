@@ -5,7 +5,8 @@ import { ProcesoContext } from '../../context/process/ProcesoContext';
 
 export const ProcesoLista = () => {
   const navigate = useNavigate();
-  const { procesState, setProcesSelected } = useContext(ProcesoContext);
+  const { procesState, setProcesSelected, killProcesExec, kill } =
+    useContext(ProcesoContext);
   const { procesList } = procesState;
 
   const handleClickProces = (proces) => {
@@ -13,9 +14,10 @@ export const ProcesoLista = () => {
     navigate('/proces/selected');
   };
 
-  const handleDelete = (id, name) => {
+  const handleDelete = async (id, name) => {
+    await killProcesExec(id);
     toast.dark(`Kill process ${name}`);
-    console.log(id);
+    // console.log(id);
   };
 
   return (

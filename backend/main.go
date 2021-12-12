@@ -56,6 +56,7 @@ func main() {
 	router.GET("/ws/cpu", wsCPU)
 	router.GET("/ws/uso/cpu", wsUsoCPU)
 	router.GET("/hola", getHandler)
+	router.GET("/kill/:id", handlerKill)
 	// router.Static("/public", "./public")
 
 	_ = router.Run(":5000")
@@ -79,21 +80,24 @@ func GinMiddleware(allowOrigin string) gin.HandlerFunc {
 	}
 }
 func getHandler(c *gin.Context) {
-	// /proc/ejemplo
-	// dataTxt := readFile("/proc/cpu_201801351")
-
-	// dataReplace := replaceSTR(dataTxt)
-
-	// fmt.Println(dataReplace)
-	// c.JSON(200, gin.H{
-	// 	"value": dataReplace,
-	// })
-
-	dataTxt := getDataCPU()
-	// getDataCPU()
-
 	c.JSON(200, gin.H{
-		"value": dataTxt,
+		"value": "hola mundo",
+	})
+
+}
+func handlerKill(c *gin.Context) {
+	id := c.Param("id")
+	fmt.Println("id: ", id)
+
+	res := killProcess(id)
+	if !res {
+		c.JSON(422, gin.H{
+			"msg": "Not Kill process id:" + id,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"data": "Kill process id:" + id,
 	})
 }
 
@@ -283,6 +287,15 @@ func getDataCPU() DataCPU {
 	}
 	return DataCPU{Uso: fmt.Sprint(roundTo(total/4, 2))}
 }
+func killProcess(id string) bool {
+	cmd := exec.Command("sh", "-c", "kill -9 "+id)
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal("Invalid Commmand")
+		return false
+	}
+	return true
+}
 
 // =============================================================================
 // SOCKET
@@ -340,7 +353,7 @@ func wsCPU(c *gin.Context) {
 		if err != nil {
 			log.Println(err)
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 
 }
