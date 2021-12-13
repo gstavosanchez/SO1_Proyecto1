@@ -77,3 +77,35 @@
 .icon-size {
   font-size: 30px;
 }
+
+.card-select {
+  display: flex;
+  flex-direction: row;
+  height: 60px;
+}
+.card-select-icon {
+  width: 50%;
+}
+
+.card-select-icon > i {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.tree {
+  color: $gris-claro;
+  transition: 0.3s ease all;
+  color: $gris-claro;
+  &:hover {
+    color: $dark-grey;
+  }
+}
+
+.lista {
+  color: $gris-claro;
+  transition: 0.3s ease all;
+  color: $gris-claro;
+  &:hover {
+    color: $dark-grey;
+  }
+}

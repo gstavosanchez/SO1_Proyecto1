@@ -1,15 +1,16 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { w3cwebsocket } from 'websocket';
 import { ProcesoContext } from '../../context/process/ProcesoContext';
 import { ProcesoLista } from '../process/ProcesoLista';
 import { Procesos } from '../process/Procesos';
+import { ProcessTree } from '../tree/ProcessTree';
 // import { initialState } from './homeHelpers';
 
 export const socket = new w3cwebsocket('ws://localhost:5000/ws/cpu');
 
 export const Home = () => {
-  // const [proceso, setProceso] = useState(initialState);
   const { setProcesState } = useContext(ProcesoContext);
+  const [selectedProcess, setSelectedProcess] = useState(0);
 
   socket.onerror = (error) => {
     console.log(`[error] ${error.message}`);
@@ -18,7 +19,7 @@ export const Home = () => {
   socket.onclose = (event) => {
     if (event.wasClean) {
       console.log(
-        `[close] Connection closed cleanly, 
+        `[close] Connection closed cleanly,
         code=${event.code} reason=${event.reason}`
       );
     } else {
@@ -51,10 +52,29 @@ export const Home = () => {
     };
   }, []);
 
+  const handleTree = () => {
+    setSelectedProcess(2);
+  };
+
+  const handleList = () => {
+    setSelectedProcess(1);
+  };
+
   return (
     <div className="home__container animate__animated animate__fadeIn">
       <Procesos />
-      <ProcesoLista />
+      <div className="card card-select mb-1">
+        <div className="card-select-icon tree" onClick={handleTree}>
+          <i className="fas fa-tree"></i>
+          <p>Árbol de Procesos</p>
+        </div>
+        <div className="card-select-icon lista" onClick={handleList}>
+          <i className="fas fa-list-ol"></i>
+          <p>Lista de Procesos</p>
+        </div>
+      </div>
+      {selectedProcess === 1 && <ProcesoLista />}
+      {selectedProcess === 2 && <ProcessTree />}
     </div>
   );
 };

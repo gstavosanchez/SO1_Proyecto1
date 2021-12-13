@@ -395,19 +395,3 @@ func wsUsoCPU(c *gin.Context) {
 // sudo netstat -lnp -> ver los puetos
 // getent passwd 1000 | cut -d: -f1 -> ver username
 // free -m | awk '{print $6}'| head -2| tail -1
-
-/*
-Hacer un EDT sobre
-la fiesta de aniversario de la universidad
-
-Proveedores
-gestion de invitados
-definir localidad
-comida
-enviar invitaciones
-Cotizaciones
-los eventos relacionados con el aniversario
-Recursos
-Presupuesto
-Interesados
-*/

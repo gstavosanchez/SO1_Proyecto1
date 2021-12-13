@@ -1,0 +1,62 @@
+.tree__item {
+  color: $dark-grey;
+  background-color: #fff;
+  border-radius: 20px;
+  border: 2px solid $dark-grey;
+  cursor: pointer;
+  transition: 0.3s ease all;
+  box-shadow: $sombra-clara;
+  margin-bottom: 5px;
+}
+
+.tree__root {
+  display: block;
+  padding: 10px 10px;
+}
+
+.tree__title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.fa-chevron-right {
+  transform: rotate(0deg);
+  transition: 0.3s ease all;
+  margin-right: 10px;
+}
+
+.tree__description {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  width: 90%;
+  padding: 0px 20px;
+}
+
+.fa-che-active {
+  transform: rotate(90deg);
+}
+
+.tree__children-container {
+  display: block;
+}
+.tree__childer {
+  display: flex;
+  flex-direction: row;
+  border: 2px solid $dark-grey;
+  background: $dark-grey;
+  color: white;
+  border-radius: 20px;
+  align-items: center;
+  padding: 0px 30px;
+  margin-bottom: 1px;
+}
+
+.tree__childre-title {
+  display: flex;
+  margin-left: 20px;
+  width: 100%;
+}

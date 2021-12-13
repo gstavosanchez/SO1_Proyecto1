@@ -25,7 +25,7 @@ export const ProcessChildrens = () => {
             <h1>ID: {value.id}</h1>
             <i className="fas fa-microchip icon-size ml-5"></i>
           </div>
-          <p className="">Nombre: {name}</p>
+          <p className="">Nombre: {value.name}</p>
         </div>
       ))}
     </div>
