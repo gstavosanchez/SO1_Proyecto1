@@ -101,13 +101,13 @@ static struct proc_ops file_ops = {
 static int __init event_init(void)
 {
   proc_create("cpu_201801351", 0, NULL, &file_ops);
-  printk(KERN_INFO "Elmer Gustavo Sanchez Garcia\nLoading module...\n");
+  printk(KERN_INFO "Elmer Gustavo Sanchez Garcia\n");
   return 0;
 }
 static void __exit event_exit(void)
 {
   remove_proc_entry("cpu_201801351", NULL);
-  printk(KERN_INFO "Diciembre 2021\nDelete module cpu...\n");
+  printk(KERN_INFO "Diciembre 2021\n");
 }
 module_init(event_init);
 module_exit(event_exit);
