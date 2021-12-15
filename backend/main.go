@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/shirou/gopsutil/cpu"
 )
 
 // cpuModule := "/proc/cpu_201801351"
@@ -24,6 +25,13 @@ var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+var clients = make(map[*websocket.Conn]string)
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 type dataJson struct {
@@ -54,13 +62,14 @@ func main() {
 	router := gin.Default()
 	fmt.Println("Server on port", 5000)
 	router.Use(GinMiddleware("http://localhost:3000"))
-	router.GET("/ws/ram", wsRAM)
-	router.GET("/ws/cpu", wsCPU)
-	router.GET("/ws/uso/cpu", wsUsoCPU)
+	router.GET("/ws", wsEndpoint)
+	// router.GET("/ws/cpu", wsCPU)
+	// router.GET("/ws/uso/cpu", wsUsoCPU)
 	router.GET("/hola", getHandler)
 	router.GET("/kill/:id", handlerKill)
 	// router.Static("/public", "./public")
 
+	go serveInformation()
 	_ = router.Run(":5000")
 }
 
@@ -272,24 +281,33 @@ func getPorcentajeRam(data string) string {
 
 /* -------------- -> CPU <- -------------- */
 func getPorcentCPU() string {
-	cmd := exec.Command("sh", "-c", "ps -eo pcpu | sort -k 1 -r | head -50")
+	// cmd := exec.Command("sh", "-c", "ps -eo pcpu | sort -k 1 -r | head -60")
+	cmd := exec.Command("sh", "-c", "top -bn 1 -i -c | head -n 3 | tail -1 | awk {'print $8'}")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println("Invalid commmand")
 		return ""
 	}
 
-	cpu := strings.ReplaceAll(string(out[:]), "%CPU\n", "")
-	cpu = strings.ReplaceAll(cpu, "\n", ",")
-	return cpu
+	// cpu := strings.ReplaceAll(string(out[:]), "%CPU\n", "")
+	// cpu = strings.ReplaceAll(cpu, "\n", ",")
+	return string(out[:])
 }
 
 func getDataCPU() DataCPU {
-	dataCpu := getPorcentCPU()
+	// dataCpu := getPorcentCPU()
+	// total := 0.0
+	// for _, value := range strings.Split(dataCpu, ",") {
+	// 	dataFloat := parseFloat(strings.TrimSpace(value))
+	// 	total += dataFloat
+	// }
+	// return DataCPU{Uso: fmt.Sprint(roundTo(total/3, 2))}
+	// fmt.Println(dataCpu)
+	// var total float64 = 100 - parseFloat(strings.TrimSpace(dataCpu))
+	cpu, _ := cpu.Percent(0, true)
 	total := 0.0
-	for _, value := range strings.Split(dataCpu, ",") {
-		dataFloat := parseFloat(strings.TrimSpace(value))
-		total += dataFloat
+	for i := range cpu {
+		total += cpu[i]
 	}
 	return DataCPU{Uso: fmt.Sprint(roundTo(total/4, 2))}
 }
@@ -307,88 +325,84 @@ func killProcess(id string) bool {
 // SOCKET
 // =============================================================================
 
-func wsRAM(c *gin.Context) {
-	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	defer ws.Close()
-	log.Println("Cliente conectado exitosamente")
-	var dataSala struct {
-		Sala string `json:"Sala"`
-	}
-
-	err = ws.ReadJSON(&dataSala)
-	if err != nil {
-		log.Println(err)
-	}
-
+func serveInformation() {
 	for {
-		var newData DataJsonRam
-		newData.Data = getRamData()
 
-		err = ws.WriteJSON(newData)
-		if err != nil {
-			log.Println(err)
+		for client := range clients {
+			var value string = clients[client]
+			if value == "home" {
+				var newData dataJson
+				newData.Data = replaceSTR(readFile("/proc/cpu_201801351"))
+
+				// fmt.Println("Contents of file:", objectJson)
+				errw := client.WriteJSON(newData)
+
+				if errw != nil {
+					fmt.Println("error:", errw)
+					client.Close()
+					delete(clients, client)
+				}
+			} else if value == "cpu" {
+				var newData DataJsonCPU
+				newData.Data = getDataCPU()
+
+				errw := client.WriteJSON(newData)
+				if errw != nil {
+					fmt.Println("error:", errw)
+					client.Close()
+					delete(clients, client)
+				}
+			} else if value == "ram" {
+
+				var newData DataJsonRam
+				newData.Data = getRamData()
+
+				errw := client.WriteJSON(newData)
+				if errw != nil {
+					// log.Printf("error: ", errw)
+					fmt.Println("error:", errw)
+					client.Close()
+					delete(clients, client)
+				}
+			} else {
+				// fmt.Println("Nothing")
+			}
 		}
+
 		time.Sleep(1 * time.Second)
 	}
-
 }
 
-func wsCPU(c *gin.Context) {
+func reader(conn *websocket.Conn) {
+	for {
+		// Read the message
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			delete(clients, conn)
+			break
+		}
+		fmt.Println(string(p))
+		clients[conn] = string(p)
+		msg := []byte("Start")
+		err = conn.WriteMessage(messageType, msg)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+}
+
+// Communication channel
+func wsEndpoint(c *gin.Context) {
 	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Println(err)
 	}
+
 	defer ws.Close()
-	log.Println("Cliente conectado exitosamente")
-	var dataSala struct {
-		Sala string `json:"Sala"`
-	}
-
-	err = ws.ReadJSON(&dataSala)
-	if err != nil {
-		log.Println(err)
-	}
-
-	for {
-		var newData dataJson
-		newData.Data = replaceSTR(readFile("/proc/cpu_201801351"))
-		err = ws.WriteJSON(newData)
-		if err != nil {
-			log.Println(err)
-		}
-		time.Sleep(2 * time.Second)
-	}
-
-}
-
-func wsUsoCPU(c *gin.Context) {
-	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	defer ws.Close()
-	log.Println("Cliente conectado exitosamente")
-	var dataSala struct {
-		Sala string `json:"Sala"`
-	}
-
-	err = ws.ReadJSON(&dataSala)
-	if err != nil {
-		log.Println(err)
-	}
-
-	for {
-		var newData DataJsonCPU
-		newData.Data = getDataCPU()
-		err = ws.WriteJSON(newData)
-		if err != nil {
-			log.Println(err)
-		}
-		time.Sleep(1 * time.Second)
-	}
+	log.Println("Client Connected!")
+	reader(ws)
 }
 
 // sudo kill $(sudo lsof -t -i:5000)

@@ -3,7 +3,7 @@ import { w3cwebsocket } from 'websocket';
 import { GraphLine } from '../graph/GraphLine';
 import { arraySecond } from '../ram/helperRAM';
 
-export const socket = new w3cwebsocket('ws://localhost:5000/ws/uso/cpu');
+export const socket = new w3cwebsocket('ws://localhost:5000/ws');
 
 export const MonitorCPU = () => {
   const [cpuUso, setCpuUso] = useState({
@@ -40,11 +40,7 @@ export const MonitorCPU = () => {
 
   useEffect(() => {
     socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          Sala: 'test',
-        })
-      );
+      socket.send('cpu');
     };
   }, []);
 

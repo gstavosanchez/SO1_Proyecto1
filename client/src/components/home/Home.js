@@ -6,7 +6,7 @@ import { Procesos } from '../process/Procesos';
 import { ProcessTree } from '../tree/ProcessTree';
 // import { initialState } from './homeHelpers';
 
-export const socket = new w3cwebsocket('ws://localhost:5000/ws/cpu');
+export const socket = new w3cwebsocket('ws://localhost:5000/ws');
 
 export const Home = () => {
   const { setProcesState } = useContext(ProcesoContext);
@@ -44,11 +44,7 @@ export const Home = () => {
 
   useEffect(() => {
     socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          Sala: 'test2',
-        })
-      );
+      socket.send('home');
     };
   }, []);
 
